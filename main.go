@@ -10,13 +10,17 @@ import (
 	"github.com/gordonklaus/portaudio"
 )
 
-func main() {
-	inputChannels := 1
-	outputChannels := 0
-	sampleRate := 16000
-	framesPerBuffer := make([]int16, 1024)
+const (
+	inputChannels  = 1
+	outputChannels = 1
+	sampleRate     = 16000
+	silenceDelay   = 1500 * time.Millisecond
+)
 
-	// initialize the audio recording interface
+func main() {
+	in := make([]int16, 1024)
+	out := make([]int16, 1024)
+
 	err := portaudio.Initialize()
 	if err != nil {
 		fmt.Errorf("Error initialize audio interface: %s", err)
@@ -24,15 +28,13 @@ func main() {
 	}
 	defer portaudio.Terminate()
 
-	fmt.Println("Got here")
-
-	// open the sound input for the microphone
 	stream, err := portaudio.OpenDefaultStream(
 		inputChannels,
 		outputChannels,
 		float64(sampleRate),
-		len(framesPerBuffer),
-		framesPerBuffer,
+		len(in),
+		in,
+		out,
 	)
 
 	if err != nil {
@@ -40,29 +42,34 @@ func main() {
 		return
 	}
 	defer stream.Close()
-	fmt.Println("Got here 2")
 
-	// open the snowboy detector
+	svc := NewService(out, stream)
 	d := snowboy.NewDetector(os.Args[1])
 	defer d.Close()
 
-	sound := NewRecorder(stream, framesPerBuffer)
+	sound := NewRecorder(stream, in)
 	d.HandleFunc(snowboy.NewHotword(os.Args[2], 0.5), func(string) {
-		fmt.Println("Start Recording")
+		log.Print("start recording")
 		sound.StartRecording()
 	})
 
-	d.HandleSilenceFunc(1500*time.Millisecond, func(string) {
-		fmt.Println("Silence detected")
+	d.HandleSilenceFunc(silenceDelay, func(string) {
+		log.Println("silence detected")
 		if sound.IsRecording() {
-			fmt.Println("Stop Recording")
+			log.Println("stop recording")
 			b := sound.StopRecording()
-			GetText(b)
+			phrase := svc.GetTranscript(b)
+
+			for _, cmd := range Commands {
+				if cmd.Regex.Match([]byte(phrase)) {
+					args := cmd.Regex.FindStringSubmatch(phrase)
+					msg, _ := cmd.Run(args...)
+
+					svc.Say(msg)
+				}
+			}
 		}
 	})
-
-	sr, nc, bd := d.AudioFormat()
-	fmt.Printf("sample rate=%d, num channels=%d, bit depth=%d\n", sr, nc, bd)
 
 	err = stream.Start()
 	if err != nil {

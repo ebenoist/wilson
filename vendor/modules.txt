@@ -1,5 +1,6 @@
 # cloud.google.com/go v0.33.1
 cloud.google.com/go/speech/apiv1
+cloud.google.com/go/texttospeech/apiv1
 cloud.google.com/go/longrunning
 cloud.google.com/go/longrunning/autogen
 cloud.google.com/go/compute/metadata
@@ -87,6 +88,7 @@ google.golang.org/appengine/internal/log
 google.golang.org/appengine/internal/remote_api
 # google.golang.org/genproto v0.0.0-20181202183823-bd91e49a0898
 google.golang.org/genproto/googleapis/cloud/speech/v1
+google.golang.org/genproto/googleapis/cloud/texttospeech/v1
 google.golang.org/genproto/googleapis/longrunning
 google.golang.org/genproto/googleapis/api/annotations
 google.golang.org/genproto/googleapis/rpc/status
