@@ -25,7 +25,7 @@ var Commands = []Command{
 	Command{
 		Regex: regexp.MustCompile(`(?i)jill`),
 		Run: func(...string) (string, error) {
-			return "hi jill-- want to play with me?", nil
+			return "hi jill?", nil
 		},
 	},
 	Command{
