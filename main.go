@@ -49,6 +49,7 @@ func main() {
 
 	sound := NewRecorder(stream, in)
 	d.HandleFunc(snowboy.NewHotword(os.Args[2], 0.5), func(string) {
+		player.Mute()
 		log.Print("start recording")
 		sound.StartRecording()
 	})
@@ -60,15 +61,28 @@ func main() {
 			b := sound.StopRecording()
 			phrase := svc.GetTranscript(b)
 
+			var found bool
 			for _, cmd := range Commands {
 				if cmd.Regex.Match([]byte(phrase)) {
 					args := cmd.Regex.FindStringSubmatch(phrase)
-					msg, _ := cmd.Run(args...)
+					msg, err := cmd.Run(args...)
+					if err != nil {
+						svc.Say("Sorry, there was a problem, please try again.")
+						return
+					}
 
+					found = true
 					svc.Say(msg)
+					return
 				}
 			}
+
+			if !found {
+				svc.Say("Sorry, I don't understand.")
+			}
 		}
+
+		player.Mute()
 	})
 
 	err = stream.Start()

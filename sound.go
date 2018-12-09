@@ -35,8 +35,9 @@ func NewRecorder(
 
 func (s *Recorder) StartRecording() {
 	s.lock.Lock()
+	defer s.lock.Unlock()
+
 	s.recording = true
-	s.lock.Unlock()
 }
 
 func (s *Recorder) StopRecording() []byte {
@@ -54,12 +55,12 @@ func (s *Recorder) StopRecording() []byte {
 
 func (s *Recorder) save(d []int) []byte {
 	f := &memfile.File{}
-	enc := wav.NewEncoder(f, 16000, 16, 1, 1)
+	enc := wav.NewEncoder(f, sampleRate, 16, 1, 1)
 
 	a := &audio.IntBuffer{
 		Format: &audio.Format{
 			NumChannels: 1,
-			SampleRate:  16000,
+			SampleRate:  sampleRate,
 		},
 		Data: d,
 	}
@@ -81,7 +82,6 @@ func (s *Recorder) IsRecording() bool {
 	return s.recording
 }
 
-// Read is the implementation of the io.Reader interface.
 func (s *Recorder) Read(p []byte) (int, error) {
 	s.stream.Read()
 
