@@ -13,6 +13,12 @@ var player = &Player{}
 
 var Commands = []Command{
 	Command{
+		Regex: regexp.MustCompile("welcome.*reverb"),
+		Run: func(...string) (string, error) {
+			return "Thanks! It's great to be here today. How may I help you?", nil
+		},
+	},
+	Command{
 		Regex: regexp.MustCompile("weather"),
 		Run: func(...string) (string, error) {
 			return GetForecast()
@@ -21,7 +27,7 @@ var Commands = []Command{
 	Command{
 		Regex: regexp.MustCompile("how.*look"),
 		Run: func(...string) (string, error) {
-			return "you both look quite nice today", nil
+			return "you all look quite nice today", nil
 		},
 	},
 	Command{
@@ -31,7 +37,7 @@ var Commands = []Command{
 		},
 	},
 	Command{
-		Regex: regexp.MustCompile("radio"),
+		Regex: regexp.MustCompile("play.*WBEZ"),
 		Run: func(...string) (string, error) {
 			go player.Play("http://wbez.streamguys1.com:80/Pledge_Free.mp3")
 			return "Playing WBEZ", nil

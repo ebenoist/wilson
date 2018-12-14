@@ -39,6 +39,8 @@ func (p *Player) Mute() {
 	p.Lock()
 	defer p.Unlock()
 
+	log.Println("mute")
+
 	if p.isPlaying() {
 		p.mplayer.Write([]byte("mute\n"))
 	}

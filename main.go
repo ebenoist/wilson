@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/brentnd/go-snowboy"
+	snowboy "github.com/brentnd/go-snowboy"
 	"github.com/gordonklaus/portaudio"
 )
 
@@ -80,9 +80,8 @@ func main() {
 			if !found {
 				svc.Say("Sorry, I don't understand.")
 			}
+			player.Mute()
 		}
-
-		player.Mute()
 	})
 
 	err = stream.Start()
